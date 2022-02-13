@@ -19,6 +19,8 @@
 
 #if defined(WIN32)
 #include "serial_port_impl_win32.h"
+#include <libserial/serial_port.h>
+
 
 namespace libserial {
 
@@ -46,7 +48,12 @@ static std::string GetLastErrorAsString()
     return message;
 }
 
-serial_port serial_port::open(const std::string &device)
+serial_port serial_port::open(
+    const std::string &device,
+    unsigned int baud_rate,
+    unsigned int data_bits,
+    serial_port::parity parity,
+    serial_port::stop_bits stop_bits)
 {
     std::string devicePath(std::string("\\\\.\\") + device);
 
@@ -93,6 +100,55 @@ serial_port serial_port::open(const std::string &device)
     }
 
     return serial_port(new serial_port_impl_win32(handle));
+}
+
+serial_port_impl_win32::serial_port_impl_win32(HANDLE handle) :
+    _handle(handle) {
+
+}
+
+bool serial_port_impl_win32::is_valid() const
+{
+    return (_handle != INVALID_HANDLE_VALUE);
+}
+
+std::string serial_port_impl_win32::error_string() const
+{
+    return _error_string;
+}
+
+size_t serial_port_impl_win32::read(uint8_t *buffer, size_t length, uint32_t timeout_ms)
+{
+    DWORD bytesRead = 0;
+    BOOL result = false;
+    if (_handle != INVALID_HANDLE_VALUE) {
+        result = ReadFile(_handle, buffer, length, &bytesRead, NULL);
+    }
+
+    if (!result) {
+        CloseHandle(_handle);
+        _handle = INVALID_HANDLE_VALUE;
+        bytesRead = 0;
+    }
+
+    return bytesRead;
+}
+
+size_t serial_port_impl_win32::write(const uint8_t *buffer, size_t length)
+{
+    DWORD bytesWritten = 0;
+    BOOL result = false;
+    if (_handle != INVALID_HANDLE_VALUE) {
+        result = WriteFile(_handle, buffer, length, &bytesWritten, NULL);
+    }
+
+    if (!result) {
+        CloseHandle(_handle);
+        _handle = INVALID_HANDLE_VALUE;
+        bytesWritten = 0;
+    }
+
+    return bytesWritten;
 }
 
 }

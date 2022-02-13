@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string>
 
 namespace libserial {
 
@@ -30,6 +31,7 @@ class serial_port_impl
 public:
     virtual ~serial_port_impl() {}
     virtual bool is_valid() const = 0;
+    virtual std::string error_string() const = 0;
     virtual size_t read(uint8_t *buffer, size_t length, uint32_t timeout_ms) = 0;
     virtual size_t write(const uint8_t *buffer, size_t length) = 0;
 };

@@ -21,7 +21,6 @@
 #define SERIAL_PORT_IMPL_WIN32_H
 
 #include "serial_port_impl.h"
-#include <libserial/serial_port.h>
 #include <windows.h>
 
 namespace libserial {
@@ -29,51 +28,15 @@ namespace libserial {
 class serial_port_impl_win32 : public serial_port_impl
 {
 public:
-    serial_port_impl_win32(HANDLE handle) :
-        _handle(handle) {
-
-    }
-
-    bool is_valid() const {
-        return (_handle != INVALID_HANDLE_VALUE);
-    }
-
-    size_t read(uint8_t *buffer, size_t length, uint32_t timeout_ms)
-    {
-        DWORD bytesRead = 0;
-        BOOL result = false;
-        if (_handle != INVALID_HANDLE_VALUE) {
-            result = ReadFile(_handle, buffer, length, &bytesRead, NULL);
-        }
-
-        if (!result) {
-            CloseHandle(_handle);
-            _handle = INVALID_HANDLE_VALUE;
-            bytesRead = 0;
-        }
-
-        return bytesRead;
-    }
-
-    size_t write(const uint8_t *buffer, size_t length)
-    {
-        DWORD bytesWritten = 0;
-        BOOL result = false;
-        if (_handle != INVALID_HANDLE_VALUE) {
-            result = WriteFile(_handle, buffer, length, &bytesWritten, NULL);
-        }
-
-        if (!result) {
-            CloseHandle(_handle);
-            _handle = INVALID_HANDLE_VALUE;
-            bytesWritten = 0;
-        }
-
-        return bytesWritten;
-    }
+    serial_port_impl_win32(HANDLE handle);
+    bool is_valid() const;
+    std::string error_string() const;
+    size_t read(uint8_t *buffer, size_t length, uint32_t timeout_ms);
+    size_t write(const uint8_t *buffer, size_t length);
 
 private:
     HANDLE _handle;
+    std::string _error_string;
 };
 
 }

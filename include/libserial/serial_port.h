@@ -32,6 +32,10 @@ class serial_port_impl;
 class serial_port
 {
 public:
+    enum class parity { none, odd, even };
+    enum class stop_bits { one, two };
+
+public:
     serial_port();
     operator bool() const;
     std::string error_string() const;
@@ -39,7 +43,12 @@ public:
     size_t write(const uint8_t *buffer, size_t length);
 
 public:
-    static serial_port open(const std::string &device);
+    static serial_port open(
+        const std::string &device,
+        unsigned int baud_rate,
+        unsigned int data_bits = 8,
+        serial_port::parity parity = serial_port::parity::none,
+        serial_port::stop_bits stop_bits = serial_port::stop_bits::one);
 
 private:
     serial_port(serial_port_impl *impl);

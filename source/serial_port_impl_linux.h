@@ -21,77 +21,22 @@
 #define SERIAL_PORT_IMPL_LINUX_H
 
 #include "serial_port_impl.h"
-#include <libserial/serial_port.h>
-
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
 
 namespace libserial {
-
 
 class serial_port_impl_linux : public serial_port_impl
 {
 public:
-    serial_port_impl_linux(int fd) :
-        _fd(fd) {
-
-    }
-
-    bool is_valid() const {
-        return (_fd != -1);
-    }
-
-    size_t read(uint8_t *buffer, size_t length, uint32_t timeout_ms)
-    {
-        ssize_t bytes_read = 0;
-
-        struct pollfd pfd[1];
-        pfd[0].fd = _fd;
-        pfd[0].events = POLLIN;
-        pfd[0].revents = 0;
-
-        if (poll(pfd, 1, timeout_ms) > 0) {
-            if (pfd[0].revents & POLLIN) {
-                bytes_read = ::read(_fd, buffer, length);
-            }
-        }
-
-        if (bytes_read < 0) {
-            ::close(_fd);
-            _fd = -1;
-            return -1;
-        }
-
-        return bytes_read;
-    }
-
-    size_t write(const uint8_t *buffer, size_t length)
-    {
-        while (length) {
-            ssize_t bytes_written = ::write(_fd, buffer, length);
-            if (bytes_written < 0) {
-                ::close(_fd);
-                _fd = -1;
-                return -1;
-            }
-
-            buffer += bytes_written;
-            length -= bytes_written;
-        }
-
-        return 0;
-    }
+    serial_port_impl_linux(int fd);
+    ~serial_port_impl_linux();
+    bool is_valid() const;
+    std::string error_string() const;
+    size_t read(uint8_t *buffer, size_t length, uint32_t timeout_ms);
+    size_t write(const uint8_t *buffer, size_t length);
 
 private:
     int _fd;
+    std::string _error_string;
 };
 
 }

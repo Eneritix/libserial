@@ -42,6 +42,7 @@ serial_port::serial_port(serial_port_impl *impl) :
 }
 
 serial_port::serial_port(const std::string &error_string) :
+    _impl(nullptr),
     _error_string(error_string)
 {
 
@@ -58,7 +59,11 @@ serial_port::operator bool() const
 
 std::string serial_port::error_string() const
 {
-    return _error_string;
+    if (_impl) {
+        return _impl->error_string();
+    } else {
+        return _error_string;
+    }
 }
 
 size_t serial_port::read(uint8_t *buffer, size_t length, uint32_t timeout_ms)
