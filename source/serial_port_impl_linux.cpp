@@ -111,6 +111,8 @@ serial_port serial_port::open(
     // Set port options
     tcgetattr(fd, &options);
 
+    cfmakeraw(&options);
+    
     cfsetispeed(&options, _map_baud_rate(baud_rate));
     cfsetospeed(&options, _map_baud_rate(baud_rate));
 
@@ -153,7 +155,6 @@ serial_port serial_port::open(
     options.c_iflag &= ~(IXON | IXOFF | IXANY);
     options.c_oflag &= ~(OPOST | ONLCR);
 
-    cfmakeraw(&options);
     tcsetattr(fd, TCSANOW, &options);
 
     // Flush
