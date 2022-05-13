@@ -28,6 +28,7 @@ namespace libserial {
 class line_reader
 {
 public:
+    line_reader();
     line_reader(const serial_port &serial_port, size_t read_cache_size = 1024);
     std::string read_line(uint32_t timeout_ms);
 

@@ -22,6 +22,14 @@
 
 namespace libserial {
 
+line_reader::line_reader() :
+    _read_cache_index(0),
+    _read_cache_count(0),
+    _cr(false)
+{
+
+}
+
 line_reader::line_reader(const serial_port &serial_port, size_t read_cache_size) :
     _serial_port(serial_port),
     _read_cache_index(0),
@@ -35,6 +43,10 @@ line_reader::line_reader(const serial_port &serial_port, size_t read_cache_size)
 std::string line_reader::read_line(uint32_t timeout_ms)
 {
     std::string result;
+
+    if (!_serial_port) {
+        return result;
+    }
 
     if (_read_cache_count == 0) {
         _read_cache_count = _serial_port.read(_read_cache.data(), _read_cache.size(), timeout_ms);
